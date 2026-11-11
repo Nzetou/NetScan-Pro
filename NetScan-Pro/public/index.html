@@ -1,0 +1,618 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetScan Pro | Network Scanner</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #38bdf8;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #94a3b8;
+        }
+
+        .panel {
+            background: #1e293b;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #38bdf8;
+        }
+
+        .authorization {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .authorization input {
+            width: auto;
+        }
+
+        .authorization label {
+            margin: 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .start {
+            background: #0284c7;
+            color: white;
+        }
+
+        .stop {
+            background: #dc2626;
+            color: white;
+        }
+
+        .export {
+            background: #334155;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        .stat-card p {
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 28px;
+        }
+
+        .results {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results th, .results td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        .results th {
+            color: #38bdf8;
+        }
+
+        .empty {
+            text-align: center !important;
+            color: #94a3b8;
+            padding: 35px !important;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .form-grid, .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .results {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <header>
+            <h1>NetScan Pro</h1>
+            <p>Network Port Scanning and Service Discovery</p>
+        </header>
+
+        <section class="panel">
+            <h2>Scan Configuration</h2> 
+
+            <div style="margin-bottom: 20px;">
+    
+                <label for="statusFilter">Filter Results:</label>
+
+    
+                <select id="statusFilter">
+        
+                    <option value="All">All Results</option>
+        
+                    <option value="Open">Open Ports Only</option>
+        
+                    <option value="Closed">Closed Ports Only</option>
+        
+                    <option value="Filtered">Filtered Ports Only</option>
+    
+                </select>
+
+            </div>
+
+
+            <div class="form-grid">
+                <div>
+                    <label for="target">Target IP / Host</label>
+                    <input type="text" id="target"
+                        placeholder="e.g. 127.0.0.1">
+                </div>
+
+                <div>
+                    <label for="ports">Ports</label>
+                    <input type="text" id="ports"
+                        placeholder="e.g. 20-100,443">
+                </div>
+
+                <div>
+                    <label for="preset">Quick Presets</label>
+                    <select id="preset">
+                        <option value="">Select a preset</option>
+                        <option value="common">Common Ports</option>
+                        <option value="web">Web Ports</option>
+                        <option value="all">All Ports (1-65535)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="threads">Concurrency</label>
+                    <input type="number" id="threads"
+                        value="40" min="5" max="150">
+                </div>
+
+                <div>
+                    <label for="timeout">Timeout (ms)</label>
+                    <input type="number" id="timeout"
+                        value="600" min="200" max="5000">
+                </div>
+            </div>
+
+            <div class="authorization">
+                <input type="checkbox" id="authorized">
+                <label for="authorized">
+                    I have permission to scan this target.
+                </label>
+            </div>
+
+            <div class="buttons">
+                <button class="start" id="startBtn">Start Scan</button>
+                <button class="stop" id="stopBtn">Stop</button>
+                <button class="export" id="jsonBtn">Export JSON</button>
+                <button class="export" id="csvBtn">Export CSV</button>
+                <button class="export" id="txtBtn">Export TXT</button>
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <p>Open</p>
+                <h3 id="openCount">0</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Closed</p>
+                <h3 id="closedCount">0</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Filtered</p>
+                <h3 id="filteredCount">0</h3>
+            </div>
+
+            <div class="stat-card">
+                <p>Scanned</p>
+                <h3 id="scannedCount">0</h3>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Scan Results</h2>
+
+            <table class="results">
+                <thead>
+                    <tr>
+                        <th>Port</th>
+                        <th>Status</th>
+                        <th>Service</th>
+                        <th>Latency</th>
+                        <th>Banner</th>
+                    </tr>
+                </thead>
+
+                <tbody id="resultsBody">
+                    <tr>
+                        <td colspan="5" class="empty">
+                            No results yet. Start a scan to see results.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            NetScan Pro | Authorized Network Security Testing
+        </footer>
+
+    </div>
+    
+<script>
+const targetInput = document.getElementById('target');
+const portsInput = document.getElementById('ports');
+const presetInput = document.getElementById('preset');
+const threadsInput = document.getElementById('threads');
+const timeoutInput = document.getElementById('timeout');
+const authorizedInput = document.getElementById('authorized');
+
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const resultsBody = document.getElementById('resultsBody');
+
+let scanResults = [];
+let controller = null;
+
+const statusMessage = document.createElement('p');
+statusMessage.style.marginTop = '15px';
+statusMessage.style.color = '#38bdf8';
+statusMessage.textContent = 'Ready to scan.';
+document.querySelector('.buttons').after(statusMessage);
+
+// Quick presets
+presetInput.addEventListener('change', () => {
+    const presets = {
+        common: '21,22,23,25,53,80,110,143,443,445,3306,3389',
+        web: '80,443,8080,8443',
+        all: '1-2000'
+    };
+
+    if (presets[presetInput.value]) {
+        portsInput.value = presets[presetInput.value];
+    }
+});
+
+// Display statistics
+function updateStats() {
+    document.getElementById('openCount').textContent =
+        scanResults.filter(r => r.status === 'Open').length;
+
+    document.getElementById('closedCount').textContent =
+        scanResults.filter(r => r.status === 'Closed').length;
+
+    document.getElementById('filteredCount').textContent =
+        scanResults.filter(r => r.status === 'Filtered').length;
+
+    document.getElementById('scannedCount').textContent =
+        scanResults.length;
+}
+
+// Display individual results safely
+
+    
+function displayResult() {
+    const filter = document.getElementById('statusFilter').value;
+
+    const filteredResults = filter === 'All'
+        ? scanResults
+        : scanResults.filter(result => result.status === filter);
+
+    resultsBody.innerHTML = '';
+
+    if (filteredResults.length === 0) {
+        resultsBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    No results found for this filter.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    filteredResults.forEach(result => {
+        const row = document.createElement('tr');
+
+        [
+            result.port,
+            result.status,
+            result.service,
+            result.latency + ' ms',
+            result.banner || 'No banner'
+        ].forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        resultsBody.appendChild(row);
+    });
+}
+
+document.getElementById('statusFilter').addEventListener('change', displayResult);
+
+
+
+// Start scan
+startBtn.addEventListener('click', async () => {
+    if (controller) return;
+
+    if (!authorizedInput.checked) {
+        alert('Please confirm that you have permission to scan this target.');
+        return;
+    }
+
+    if (!targetInput.value.trim() || !portsInput.value.trim()) {
+        alert('Enter a target and port configuration.');
+        return;
+    }
+
+    const config = {
+        target: targetInput.value.trim(),
+        ports: portsInput.value.trim(),
+        threads: Number(threadsInput.value),
+        timeout: Number(timeoutInput.value),
+        authorized: true
+    };
+
+    scanResults = [];
+    updateStats();
+    resultsBody.innerHTML = '';
+
+    controller = new AbortController();
+    startBtn.disabled = true;
+    statusMessage.textContent = 'Connecting to scanning engine...';
+
+    try {
+        const response = await fetch('/api/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(config),
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Scan request failed.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                const event = JSON.parse(line);
+
+                if (event.type === 'start') {
+                    statusMessage.textContent =
+                        `Scanning ${event.target} (${event.total} ports)...`;
+                }
+
+                if (event.type === 'result') {
+                    scanResults.push(event.result);
+                    displayResult();
+                    updateStats();
+
+                    statusMessage.textContent =
+                        `Scanning... ${event.scanned} of ${event.total}`;
+                }
+
+                if (event.type === 'done') {
+                    statusMessage.textContent = event.cancelled
+                        ? 'Scan stopped.'
+                        : 'Scan completed successfully.';
+                }
+
+                if (event.type === 'error') {
+                    throw new Error(event.error);
+                }
+            }
+        }
+
+        if (buffer.trim()) {
+            const event = JSON.parse(buffer);
+
+            if (event.type === 'error') {
+                throw new Error(event.error);
+            }
+
+            if (event.type === 'done') {
+                statusMessage.textContent = event.cancelled
+                    ? 'Scan stopped.'
+                    : 'Scan completed successfully.';
+            }
+        }
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            statusMessage.textContent = 'Scan stopped.';
+        } else {
+            statusMessage.textContent = 'Error: ' + error.message;
+        }
+    } finally {
+        controller = null;
+        startBtn.disabled = false;
+    }
+});
+
+// Stop scan
+stopBtn.addEventListener('click', () => {
+    if (controller) {
+        controller.abort();
+        statusMessage.textContent = 'Stopping scan...';
+    }
+});
+
+// Export results
+function exportFile(type) {
+    if (!scanResults.length) {
+        alert('There are no scan results to export.');
+        return;
+    }
+
+    let content;
+    let mime;
+    let filename;
+
+    if (type === 'json') {
+        content = JSON.stringify(scanResults, null, 2);
+        mime = 'application/json';
+        filename = 'netscan-results.json';
+
+    } else if (type === 'csv') {
+        const headers = ['Port', 'Status', 'Service', 'Latency', 'Banner'];
+
+        const rows = scanResults.map(r => [
+            r.port,
+            r.status,
+            r.service,
+            r.latency,
+            r.banner || ''
+        ]);
+
+        content = [headers, ...rows]
+            .map(row => row.map(value =>
+                '"' + String(value).replace(/"/g, '""') + '"'
+            ).join(','))
+            .join('\n');
+
+        mime = 'text/csv';
+        filename = 'netscan-results.csv';
+
+    } else {
+        content = scanResults.map(r =>
+            `Port: ${r.port} | Status: ${r.status} | Service: ${r.service} | Latency: ${r.latency} ms | Banner: ${r.banner || 'None'}`
+        ).join('\n');
+
+        mime = 'text/plain';
+        filename = 'netscan-results.txt';
+    }
+
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('jsonBtn').addEventListener('click',
+    () => exportFile('json'));
+
+document.getElementById('csvBtn').addEventListener('click',
+    () => exportFile('csv'));
+
+document.getElementById('txtBtn').addEventListener('click',
+    () => exportFile('txt'));
+</script>
+</body>
+</html>
+
+</body>
+</html>
